@@ -1,3 +1,6 @@
+import math
+import random
+
 def is_valid(state):
     m_left, c_left, b_pos = state
     m_right, c_right = 3 - m_left, 3 - c_left
@@ -25,33 +28,45 @@ def get_successors(state):
 def is_goal(state):
     return state == (0, 0, 0)
 
-def dls(current_state, path, limit, explored, nodes_expanded):
-    if is_goal(current_state): return path, nodes_expanded
-    if limit == 0: return "CUTOFF", nodes_expanded
-    
-    cutoff_occurred = False
-    for successor in get_successors(current_state):
-        if successor not in explored:
-            explored.add(successor)
-            nodes_expanded[0] += 1
-            result, _ = dls(successor, path + [successor], limit - 1, explored, nodes_expanded)
-            explored.remove(successor) 
-            if result == "CUTOFF": cutoff_occurred = True
-            elif result is not None: return result, nodes_expanded
-                
-    return "CUTOFF" if cutoff_occurred else None, nodes_expanded
+def cost_function(state):
+    """ Evaluates how far the state is from the goal (0 people on left) """
+    m_left, c_left, _ = state
+    return m_left + c_left
 
-def ids(start_state):
-    depth_limit, nodes_expanded = 0, [0]
-    while True:
-        explored = set([start_state])
-        result, _ = dls(start_state, [start_state], depth_limit, explored, nodes_expanded)
-        if result != "CUTOFF" and result is not None: return result, nodes_expanded[0]
-        depth_limit += 1
-        if depth_limit > 30: return None, nodes_expanded[0] # Prevent infinite loop
+def simulated_annealing(start_state, initial_temp=100.0, cooling_rate=0.95, max_steps=200):
+    current_state = start_state
+    current_cost = cost_function(current_state)
+    path = [current_state]
+    temp = initial_temp
+    steps_taken = 0
+
+    while temp > 0.1 and steps_taken < max_steps:
+        if is_goal(current_state):
+            return path, steps_taken, True
+
+        successors = get_successors(current_state)
+        if not successors: break
+
+        next_state = random.choice(successors)
+        next_cost = cost_function(next_state)
+
+        delta_e = current_cost - next_cost
+
+        # Accept if better, otherwise accept probabilistically based on temp
+        if delta_e > 0 or random.random() < math.exp(delta_e / temp):
+            current_state = next_state
+            current_cost = next_cost
+            path.append(current_state)
+
+        temp *= cooling_rate
+        steps_taken += 1
+
+    # Returns the path even if it fails, so the user can see how it got trapped
+    success = is_goal(current_state)
+    return path, steps_taken, success
 
 def print_step_by_step(path):
-    print(f"    [Step 0] Initial State: {path[0]}")
+    print(f"\n    [Step 0] Initial State: {path[0]}")
     for i in range(1, len(path)):
         prev, curr = path[i-1], path[i]
         m_moved, c_moved = abs(prev[0] - curr[0]), abs(prev[1] - curr[1])
@@ -59,7 +74,7 @@ def print_step_by_step(path):
         print(f"    [Step {i}] Moved {m_moved} Missionary & {c_moved} Cannibal to {direction} -> State: {curr}")
 
 def run_experiment():
-    print("="*70 + "\n  ITERATIVE DEEPENING SEARCH (IDS)\n" + "="*70)
+    print("="*70 + "\n SIMULATED ANNEALING (LOCAL SEARCH)\n" + "="*70)
     
     while True:
         try:
@@ -78,13 +93,15 @@ def run_experiment():
                 print("[!] Warning: This start state is unsafe/invalid.")
                 
             print(f"\nEvaluating Start: {start_state} -> Goal: (0, 0, 0)")
-            path, nodes = ids(start_state)
+            path, steps, success = simulated_annealing(start_state)
             
-            if path:
-                print(f"  -> Success! Nodes Expanded: {nodes} | Total Moves: {len(path)-1}")
+            if success:
+                print(f"  -> SUCCESS! Steps Taken: {steps} | Total Moves: {len(path)-1}")
                 print_step_by_step(path)
             else:
-                print(f"  -> NO SOLUTION FOUND. Nodes Expanded: {nodes}")
+                print(f"  -> TRAPPED IN LOCAL MINIMA. Steps Taken: {steps} | Moves before trapped: {len(path)-1}")
+                print("     (Showing the path it took before failing):")
+                print_step_by_step(path)
                 
             print("\nOptions:")
             print("1 - Continue to test another data")
@@ -103,11 +120,3 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
-
-
-
-
-
-
-
-
