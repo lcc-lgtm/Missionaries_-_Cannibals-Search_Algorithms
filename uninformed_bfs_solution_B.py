@@ -1,4 +1,4 @@
-import heapq
+from collections import deque
 
 def is_valid(state):
     m_left, c_left, b_pos = state
@@ -27,18 +27,13 @@ def get_successors(state):
 def is_goal(state):
     return state == (0, 0, 0)
 
-def heuristic(state):
-    """ Admissible Heuristic: (Remaining Missionaries + Cannibals) / Boat Capacity """
-    m_left, c_left, _ = state
-    return (m_left + c_left) / 2.0
-
-def a_star(start_state):
-    pq = [(heuristic(start_state), 0, start_state, [start_state])]
+def bfs(start_state):
+    queue = deque([(start_state, [start_state])])
     explored = set([start_state])
     nodes_expanded = 0
 
-    while pq:
-        _, g_score, current_state, path = heapq.heappop(pq)
+    while queue:
+        current_state, path = queue.popleft()
         nodes_expanded += 1
 
         if is_goal(current_state):
@@ -47,14 +42,11 @@ def a_star(start_state):
         for successor in get_successors(current_state):
             if successor not in explored:
                 explored.add(successor)
-                new_g = g_score + 1
-                f_score = new_g + heuristic(successor)
-                heapq.heappush(pq, (f_score, new_g, successor, path + [successor]))
-
+                queue.append((successor, path + [successor]))
     return None, nodes_expanded
 
 def print_step_by_step(path):
-    print(f"    [Step 0] Initial State: {path[0]}")
+    print(f"\n    [Step 0] Initial State: {path[0]}")
     for i in range(1, len(path)):
         prev, curr = path[i-1], path[i]
         m_moved, c_moved = abs(prev[0] - curr[0]), abs(prev[1] - curr[1])
@@ -62,7 +54,7 @@ def print_step_by_step(path):
         print(f"    [Step {i}] Moved {m_moved} Missionary & {c_moved} Cannibal to {direction} -> State: {curr}")
 
 def run_experiment():
-    print("="*70 + "\n  A* SEARCH (INFORMED)\n" + "="*70)
+    print("="*70 + "\n BREADTH-FIRST SEARCH (BFS)\n" + "="*70)
     
     while True:
         try:
@@ -81,13 +73,14 @@ def run_experiment():
                 print("[!] Warning: This start state is unsafe/invalid.")
                 
             print(f"\nEvaluating Start: {start_state} -> Goal: (0, 0, 0)")
-            path, nodes = a_star(start_state)
+            path, nodes = bfs(start_state)
             
             if path:
-                print(f"  -> Success! Nodes Expanded: {nodes} | Total Moves: {len(path)-1}")
+                print(f"  -> SUCCESS! Nodes Expanded: {nodes} | Total Moves: {len(path)-1}")
                 print_step_by_step(path)
             else:
                 print(f"  -> NO SOLUTION FOUND. Nodes Expanded: {nodes}")
+                print("     (The graph is disconnected; no path exists to the goal).")
                 
             print("\nOptions:")
             print("1 - Continue to test another data")
@@ -106,4 +99,3 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
-
