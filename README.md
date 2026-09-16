@@ -9,10 +9,10 @@ outnumber missionaries on either bank.
 
 | File | Algorithm | Type |
 |---|---|---|
-| `uninformed_bfs.py` | Breadth-First Search (BFS) | Uninformed[cite: 3] |
-| `uninformed_ids.py` | Iterative Deepening Search (IDS) | Uninformed[cite: 2] |
-| `informed_astar.py` | A* Search | Informed (heuristic)[cite: 1] |
-| `informed_sa.py` | Simulated Annealing (SA) | Local Search[cite: 4] |
+| `uninformed_bfs_solution.py` | Breadth-First Search (BFS) | Uninformed[cite: 3] |
+| `uninformed_IDS_solution.py` | Iterative Deepening Search (IDS) | Uninformed[cite: 2] |
+| `informed_Astar_solution.py` | A* Search | Informed (heuristic)[cite: 1] |
+| `informed_heuristic_local_sa_solution.py` | Simulated Annealing (SA) | Local Search[cite: 4] |
 
 ## State Representation
 
