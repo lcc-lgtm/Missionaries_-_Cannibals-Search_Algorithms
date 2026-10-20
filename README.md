@@ -22,5 +22,3 @@ Each state is a tuple `(M_left, C_left, boat_pos)`:
 - `boat_pos` — 1 if boat is on the left bank, 0 if on the right
 
 Goal state: `(0, 0, 0)`
-
-## A* Heuristic
