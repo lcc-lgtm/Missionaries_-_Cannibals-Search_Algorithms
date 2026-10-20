@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque 
 
 def is_valid(state):
     m_left, c_left, b_pos = state
