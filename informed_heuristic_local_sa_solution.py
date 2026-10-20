@@ -1,6 +1,6 @@
 import math
 import random
-
+ 
 def is_valid(state):
     m_left, c_left, b_pos = state
     m_right, c_right = 3 - m_left, 3 - c_left
