@@ -1,4 +1,4 @@
-import heapq
+import heapq 
 
 def is_valid(state):
     m_left, c_left, b_pos = state
